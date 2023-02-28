@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { GridItem, Button } from "@chakra-ui/react";
-const Box = ({ keyVal, start, end }) => {
+const Box = ({ keyVal, start, end ,wall,gridMatrix,setGridMatrix}) => {
   const [bgColor, setBgColor] = useState(``);
   useEffect(() => {
     if (start) {
@@ -12,9 +12,12 @@ const Box = ({ keyVal, start, end }) => {
 
   const handleClick = (e) => {
     if (start || end) return;
+    const arr=keyVal.split('-')
+    const i=arr[0],j=arr[1];
+    gridMatrix[i][j]=1;
+    setGridMatrix(gridMatrix)
+    // console.log(gridMatrix)
     setBgColor(bgColor === `#0C3446` ? `` : `#0C3446`);
-    console.log(start);
-    console.log(end);
     console.log(keyVal);
   };
   return (
