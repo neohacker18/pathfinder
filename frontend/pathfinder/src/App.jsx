@@ -1,7 +1,13 @@
+import Navbar from "./components/Navbar"
+import Logbar from "./components/Logbar"
+import Matrix from "./components/Matrix"
+
 function App() {
   return (
     <div>
-      Hello world
+      <Navbar/>
+      <Logbar/>
+      <Matrix/>
     </div>
   )
 }
