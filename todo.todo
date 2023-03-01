@@ -6,4 +6,6 @@ handle error route on backend
 add a loader next to the play button and log the processing
 
 
-create an identical size colour matrix and use that to colour the path
+instead of colouring all at once, store the path taken and the nodes visited in the order and then colour them one by one at the box component 
+
+for gradient you can use distance = sqrt ((i-starti)^2 + (j-startj)^2) and add that in the rgb 

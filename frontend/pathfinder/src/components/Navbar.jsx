@@ -10,6 +10,10 @@ export default function Navbar({
   setGridMatrix,
   colourMatrix,
   setColourMatrix,
+  pathTaken,
+  setPathTaken,
+  nodesVisited,
+  setNodesVisited,
 }) {
   const [algo, setAlgo] = useState("Dijkstra");
   const [copyPath, setCopyPath] = useState([]);
@@ -22,7 +26,6 @@ export default function Navbar({
   const handleAlgorithms = (e) => {
     setAlgo(e.target.value);
   };
-  const nodesVisited = [];
   function dijkstra(grid, startNode, endNode) {
     // Initialize distances of all nodes to Infinity
     const distances = {};
@@ -107,23 +110,24 @@ export default function Navbar({
     const startNode = start.split("-")[0] + "," + start.split("-")[1];
     const endNode = end.split("-")[0] + "," + end.split("-")[1];
     const response = dijkstra(gridMatrix, startNode, endNode);
-    // console.log(response);
-    console.log(nodesVisited)
-    for(let x=1;x<nodesVisited.length-1;x++){
-      const i = nodesVisited[x].split(",")[0];
-      const j = nodesVisited[x].split(",")[1];
-      colourMatrix[i][j] = "#7EDFEC";
-    }
-    setColourMatrix(colourMatrix)
-    console.log(colourMatrix)
+    setPathTaken(response)
+    setNodesVisited(nodesVisited)
+    // for (let x = 1; x < nodesVisited.length - 1; x++) {
+    //   const i = nodesVisited[x].split(",")[0];
+    //   const j = nodesVisited[x].split(",")[1];
+      // colourMatrix[i][j] = "#7EDFEC";
+    // }
+    // setColourMatrix(colourMatrix);
+    // console.log(colourMatrix);
     //till response.length-1 because we dont want to change the colour of the end node
-    for (let x = 1; x < response.length - 1; x++) {
-      const i = response[x].split(",")[0];
-      const j = response[x].split(",")[1];
-      colourMatrix[i][j] = "#EF8200";
-      setColourMatrix(colourMatrix);
-    }
-    console.log(colourMatrix);
+    // for (let x = 1; x < response.length - 1; x++) {
+    //   const i = response[x].split(",")[0];
+    //   const j = response[x].split(",")[1];
+      
+      // colourMatrix[i][j] = "#EF8200";
+      // setColourMatrix(colourMatrix);
+    // }
+    // console.log(colourMatrix);
     // })
     // .catch((err) => console.log(err));
   };

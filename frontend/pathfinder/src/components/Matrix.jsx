@@ -3,11 +3,22 @@ import { Grid } from "@chakra-ui/react";
 import React from "react";
 import Box from "./Box";
 
-const Matrix = ({ start, end, rows, cols, gridMatrix, setGridMatrix,colourMatrix,setColourMatrix }) => {
-  useEffect(() => {
+const Matrix = ({
+  start,
+  end,
+  rows,
+  cols,
+  gridMatrix,
+  setGridMatrix,
+  colourMatrix,
+  setColourMatrix,
+  pathTaken,
+  setPathTaken,
+  nodesVisited,
+  setNodesVisited,
+}) => {
+  useEffect(() => {}, [colourMatrix]);
 
-  }, [colourMatrix])
-  
   const START = start.split("-");
   const END = end.split("-");
   const items = [];
@@ -23,6 +34,10 @@ const Matrix = ({ start, end, rows, cols, gridMatrix, setGridMatrix,colourMatrix
           setGridMatrix={setGridMatrix}
           colourMatrix={colourMatrix}
           setColourMatrix={setColourMatrix}
+          nodesVisited={nodesVisited}
+          setNodesVisited={setNodesVisited}
+          pathTaken={pathTaken}
+          setPathTaken={setPathTaken}
         />
       );
       // if ((START[0] == i && START[1] == j) || (END[0] == i && END[1] == j)) {

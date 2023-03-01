@@ -8,6 +8,8 @@ function App() {
   const [cols, setCols] = useState(0);
   const [gridMatrix, setGridMatrix] = useState([]);
   const [colourMatrix, setColourMatrix] = useState([]);
+  const [pathTaken,setPathTaken]=useState([])
+  const [nodesVisited,setNodesVisited]=useState([])
   useEffect(() => {
     const height = window.innerHeight;
     const width = window.innerWidth;
@@ -41,6 +43,10 @@ function App() {
         setGridMatrix={setGridMatrix}
         colourMatrix={colourMatrix}
         setColourMatrix={setColourMatrix}
+        nodesVisited={nodesVisited}
+        setNodesVisited={setNodesVisited}
+        pathTaken={pathTaken}
+        setPathTaken={setPathTaken}
       />
       <Logbar />
       <Matrix
@@ -52,6 +58,10 @@ function App() {
         end={end}
         colourMatrix={colourMatrix}
         setColourMatrix={setColourMatrix}
+        nodesVisited={nodesVisited}
+        setNodesVisited={setNodesVisited}
+        pathTaken={pathTaken}
+        setPathTaken={setPathTaken}
       />
     </div>
   );
