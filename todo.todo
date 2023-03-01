@@ -4,3 +4,6 @@ add obstacle through mouse drag
 send request to backend to convert given matrix into adjacency list then apply Dijksta on that received list
 handle error route on backend
 add a loader next to the play button and log the processing
+
+
+create an identical size colour matrix and use that to colour the path

@@ -1,12 +1,13 @@
-import React,{useState,useEffect} from 'react'
-import Navbar from "./components/Navbar"
-import Logbar from "./components/Logbar"
-import Matrix from "./components/Matrix"
+import React, { useState, useEffect } from "react";
+import Navbar from "./components/Navbar";
+import Logbar from "./components/Logbar";
+import Matrix from "./components/Matrix";
 
 function App() {
   const [rows, setRows] = useState(0);
   const [cols, setCols] = useState(0);
   const [gridMatrix, setGridMatrix] = useState([]);
+  const [colourMatrix, setColourMatrix] = useState([]);
   useEffect(() => {
     const height = window.innerHeight;
     const width = window.innerWidth;
@@ -19,17 +20,41 @@ function App() {
         .fill()
         .map(() => Array(numCols).fill(0))
     );
-    setEnd(`${numRows-5}-${numCols-10}`)
+    setEnd(`${numRows - 5}-${numCols - 10}`);
+    setColourMatrix(
+      Array(numRows)
+        .fill()
+        .map(() => Array(numCols).fill(""))
+    );
+    setEnd(`${numRows - 5}-${numCols - 10}`);
   }, []);
-  const [start,setStart]=useState('4-6')
-  const [end,setEnd]=useState(`4-6`)
+  const [start, setStart] = useState("4-6");
+  const [end, setEnd] = useState("4-6");
   return (
     <div>
-      <Navbar start={start} end={end} gridMatrix={gridMatrix} setGridMatrix={setGridMatrix}/>
-      <Logbar/>
-      <Matrix rows={rows} cols={cols} gridMatrix={gridMatrix} setGridMatrix={setGridMatrix} start={start} end={end}/>
+      <Navbar
+        rows={rows}
+        cols={cols}
+        start={start}
+        end={end}
+        gridMatrix={gridMatrix}
+        setGridMatrix={setGridMatrix}
+        colourMatrix={colourMatrix}
+        setColourMatrix={setColourMatrix}
+      />
+      <Logbar />
+      <Matrix
+        rows={rows}
+        cols={cols}
+        gridMatrix={gridMatrix}
+        setGridMatrix={setGridMatrix}
+        start={start}
+        end={end}
+        colourMatrix={colourMatrix}
+        setColourMatrix={setColourMatrix}
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

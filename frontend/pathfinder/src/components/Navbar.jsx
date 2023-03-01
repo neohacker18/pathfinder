@@ -3,10 +3,16 @@ import { Flex, Spacer, Link, Text, Select, Button } from "@chakra-ui/react";
 import axios from "axios";
 import "../App.css";
 
-export default function Navbar({ start, end, gridMatrix, setGridMatrix }) {
-  const [path, setPath] = useState([]);
-  const [graph, setGraph] = useState({});
+export default function Navbar({
+  start,
+  end,
+  gridMatrix,
+  setGridMatrix,
+  colourMatrix,
+  setColourMatrix,
+}) {
   const [algo, setAlgo] = useState("Dijkstra");
+  const [copyPath, setCopyPath] = useState([]);
   const handlePlay = () => {
     console.log(algo);
     if (algo === "Dijkstra") {
@@ -14,77 +20,112 @@ export default function Navbar({ start, end, gridMatrix, setGridMatrix }) {
     }
   };
   const handleAlgorithms = (e) => {
-    console.log(e.target.value);
     setAlgo(e.target.value);
   };
-  const handleDijkstra = () => {
-    axios
-      .post(
-        "http://localhost:3000/matrixToGraph",
-        {
-          gridMatrix: JSON.stringify(gridMatrix),
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((res) => {
-        const graph = res.data.graph; // Set the graph state variable from the response data
-        const startNode = start.split("-")[0] + "," + start.split("-")[1];
-        const endNode = end.split("-")[0] + "," + end.split("-")[1];
-        const distances = {};
-        const visited = {};
-        const previous = {};
+  const nodesVisited = [];
+  function dijkstra(grid, startNode, endNode) {
+    // Initialize distances of all nodes to Infinity
+    const distances = {};
+    const visited = {};
+    for (let i = 0; i < grid.length; i++) {
+      for (let j = 0; j < grid[i].length; j++) {
+        const node = `${i},${j}`;
+        distances[node] = Infinity;
+        visited[node] = false;
+      }
+    }
 
-        for (let node in graph) {
-          console.log(node==startNode)
-          distances[node] = Infinity;
-          visited[node] = false;
-          previous[node] = null;
-        }
-
-        distances[startNode] = 0;
-        while (true) {
-          let currentNode = null;
+    // Set distance of start node to 0
+    distances[startNode] = 0;
+    // Initialize priority queue with start node
+    const queue = [startNode];
+    while (queue.length > 0) {
+      // Get node with minimum distance from start
+      const currentNode = queue.shift();
+      nodesVisited.push(currentNode);
+      // If we have reached the end node, return the shortest path
+      if (currentNode === endNode) {
+        console.log(distances);
+        const path = [currentNode];
+        let prevNode = currentNode;
+        let x = 1000;
+        while (
+          prevNode !== startNode &&
+          prevNode &&
+          !visited[prevNode] &&
+          x--
+        ) {
+          const neighbors = getNeighbors(prevNode, grid.length, grid[0].length);
+          if (neighbors.length === 0) break;
+          let shortestNeighbor;
           let shortestDistance = Infinity;
-
-          for (let node in graph) {
-            if (!visited[node] && distances[node] < shortestDistance) {
-              currentNode = node;
-              shortestDistance = distances[node];
+          for (const neighbor of neighbors) {
+            if (distances[neighbor] < shortestDistance) {
+              shortestNeighbor = neighbor;
+              shortestDistance = distances[neighbor];
             }
           }
-          if (currentNode === null) {
-            break;
-          }
-
-          visited[currentNode] = true;
-          for (let neighbor in graph[currentNode]) {
-            let distance = graph[currentNode][neighbor];
-            let totalDistance = distances[currentNode] + distance;
-
-            if (totalDistance < distances[neighbor]) {
-              distances[neighbor] = totalDistance;
-              previous[neighbor] = currentNode;
-            }
-          }
+          path.unshift(shortestNeighbor);
+          prevNode = shortestNeighbor;
         }
-        console.log(previous)
-        // Backtrack from end node to start node to get the path
-        let node = endNode;
-        const path = [node];
+        return path;
+      }
 
-        while (node !== startNode) {
-          node = previous[node];
-          path.unshift(node);
+      // Explore neighbors of current node
+      const neighbors = getNeighbors(currentNode, grid.length, grid[0].length);
+      if (neighbors.length === 0) continue;
+      for (const neighbor of neighbors) {
+        const [x, y] = neighbor.split(",").map(Number);
+        const weight = grid[x][y];
+
+        // Calculate new distance from start to neighbor
+        const distance = distances[currentNode] + (weight >= 1 ? weight : 1);
+
+        // Update distance if it's shorter than current distance
+        if (distance < distances[neighbor]) {
+          distances[neighbor] = distance;
+          queue.push(neighbor);
         }
+      }
+    }
+    // If we reach here, there is no path from start to end
+    return null;
+  }
 
-        setPath(path);
-        console.log(path);
-      })
-      .catch((err) => console.log(err));
+  function getNeighbors(node, GRID_ROWS, GRID_COLS) {
+    if (!node || !GRID_ROWS || !GRID_COLS) return [];
+    const [x, y] = node.split(",").map(Number);
+    const neighbors = [];
+    if (x < GRID_ROWS - 1) neighbors.push(`${x + 1},${y}`);
+    if (y < GRID_COLS - 1) neighbors.push(`${x},${y + 1}`);
+    if (x > 0) neighbors.push(`${x - 1},${y}`);
+    if (y > 0) neighbors.push(`${x},${y - 1}`);
+
+    return neighbors;
+  }
+  const handleDijkstra = () => {
+    const startNode = start.split("-")[0] + "," + start.split("-")[1];
+    const endNode = end.split("-")[0] + "," + end.split("-")[1];
+    const response = dijkstra(gridMatrix, startNode, endNode);
+    // console.log(response);
+    console.log(nodesVisited)
+    for(let x=1;x<nodesVisited.length-1;x++){
+      const i = nodesVisited[x].split(",")[0];
+      const j = nodesVisited[x].split(",")[1];
+      colourMatrix[i][j] = "#7EDFEC";
+    }
+    setColourMatrix(colourMatrix)
+    console.log(colourMatrix)
+    //till response.length-1 because we dont want to change the colour of the end node
+    for (let x = 1; x < response.length - 1; x++) {
+      const i = response[x].split(",")[0];
+      const j = response[x].split(",")[1];
+      colourMatrix[i][j] = "#EF8200";
+      setColourMatrix(colourMatrix);
+    }
+    console.log(colourMatrix);
+    // })
+    // .catch((err) => console.log(err));
   };
 
   return (
