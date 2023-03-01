@@ -1,0 +1,8 @@
+.select-menu option{
+    color: black;
+    background-color: rgb(255, 255, 255);
+}
+
+#settings-btn:hover{
+    background-color: black;
+}

@@ -1,0 +1,6 @@
+remove hardcoded values of begin and end and make them draggable
+add animation to drop obstacle
+add obstacle through mouse drag
+send request to backend to convert given matrix into adjacency list then apply Dijksta on that received list
+handle error route on backend
+add a loader next to the play button and log the processing
