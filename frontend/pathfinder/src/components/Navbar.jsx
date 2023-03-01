@@ -12,84 +12,81 @@ export default function Navbar({ start, end, gridMatrix, setGridMatrix }) {
     if (algo === "Dijkstra") {
       handleDijkstra();
     }
-  }
-  const handleAlgorithms=(e)=>{
-    console.log(e.target.value)
-    setAlgo(e.target.value)
-  }
-    const handleDijkstra = () => {
-      axios
-        .post(
-          "http://localhost:3000/matrixToGraph",
-          {
-            gridMatrix: JSON.stringify(gridMatrix),
+  };
+  const handleAlgorithms = (e) => {
+    console.log(e.target.value);
+    setAlgo(e.target.value);
+  };
+  const handleDijkstra = () => {
+    axios
+      .post(
+        "http://localhost:3000/matrixToGraph",
+        {
+          gridMatrix: JSON.stringify(gridMatrix),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
           },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        )
-        .then((res) => {
-          const graph = res.data.graph; // Set the graph state variable from the response data
-          console.log(graph)
-          const distances = {};
-          const visited = {};
-          const previous = {};
-    
+        }
+      )
+      .then((res) => {
+        const graph = res.data.graph; // Set the graph state variable from the response data
+        const startNode = start.split("-")[0] + "," + start.split("-")[1];
+        const endNode = end.split("-")[0] + "," + end.split("-")[1];
+        const distances = {};
+        const visited = {};
+        const previous = {};
+
+        for (let node in graph) {
+          console.log(node==startNode)
+          distances[node] = Infinity;
+          visited[node] = false;
+          previous[node] = null;
+        }
+
+        distances[startNode] = 0;
+        while (true) {
+          let currentNode = null;
+          let shortestDistance = Infinity;
+
           for (let node in graph) {
-            distances[node] = Infinity;
-            visited[node] = false;
-            previous[node] = null;
-          }
-    
-          distances[start] = 0;
-    
-          while (true) {
-            let currentNode = null;
-            let shortestDistance = Infinity;
-    
-            for (let node in graph) {
-              if (!visited[node] && distances[node] < shortestDistance) {
-                currentNode = node;
-                shortestDistance = distances[node];
-              }
-            }
-    
-            if (currentNode === null) {
-              break;
-            }
-    
-            visited[currentNode] = true;
-    
-            for (let neighbor in graph[currentNode]) {
-              let distance = graph[currentNode][neighbor];
-              let totalDistance = distances[currentNode] + distance;
-    
-              if (totalDistance < distances[neighbor]) {
-                distances[neighbor] = totalDistance;
-                previous[neighbor] = currentNode;
-              }
+            if (!visited[node] && distances[node] < shortestDistance) {
+              currentNode = node;
+              shortestDistance = distances[node];
             }
           }
-    
-          // Backtrack from end node to start node to get the path
-          let node = end;
-          const path = [node];
-  
-          // console.log(start+"  "+end)
-          // while (node !== start) {
-          //   node = previous[node];
-          //   path.unshift(node);
-          // }
+          if (currentNode === null) {
+            break;
+          }
 
+          visited[currentNode] = true;
+          for (let neighbor in graph[currentNode]) {
+            let distance = graph[currentNode][neighbor];
+            let totalDistance = distances[currentNode] + distance;
 
-          // setPath(path);
-          // console.log(path);
-        })
-        .catch((err) => console.log(err));
-    };
-    
+            if (totalDistance < distances[neighbor]) {
+              distances[neighbor] = totalDistance;
+              previous[neighbor] = currentNode;
+            }
+          }
+        }
+        console.log(previous)
+        // Backtrack from end node to start node to get the path
+        let node = endNode;
+        const path = [node];
+
+        while (node !== startNode) {
+          node = previous[node];
+          path.unshift(node);
+        }
+
+        setPath(path);
+        console.log(path);
+      })
+      .catch((err) => console.log(err));
+  };
+
   return (
     <Flex
       as="nav"
@@ -163,5 +160,3 @@ export default function Navbar({ start, end, gridMatrix, setGridMatrix }) {
     </Flex>
   );
 }
-
-

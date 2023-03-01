@@ -6,26 +6,24 @@ exports.matrixToGraph = (req, res, next) => {
       const node = `${i},${j}`;
 
       // Create a new node in the graph for each 0 in the matrix
-      if (matrix[i][j] === 0) {
-        graph[node] = {};
+      graph[node] = {};
 
-        // Add neighbors to the node based on adjacent 0s in the matrix
-        if (i > 0 && matrix[i - 1][j] === 0) {
-          graph[node][`${i - 1},${j}`] = 1;
-        }
-        if (j > 0 && matrix[i][j - 1] === 0) {
-          graph[node][`${i},${j - 1}`] = 1;
-        }
-        if (i < matrix.length - 1 && matrix[i + 1][j] === 0) {
-          graph[node][`${i + 1},${j}`] = 1;
-        }
-        if (j < matrix[i].length - 1 && matrix[i][j + 1] === 0) {
-          graph[node][`${i},${j + 1}`] = 1;
-        }
+      // Add neighbors to the node based on adjacent 0s in the matrix
+      if (i > 0 && matrix[i - 1][j] === 0) {
+        graph[node][`${i - 1},${j}`] = 1;
+      }
+      if (j > 0 && matrix[i][j - 1] === 0) {
+        graph[node][`${i},${j - 1}`] = 1;
+      }
+      if (i < matrix.length - 1 && matrix[i + 1][j] === 0) {
+        graph[node][`${i + 1},${j}`] = 1;
+      }
+      if (j < matrix[i].length - 1 && matrix[i][j + 1] === 0) {
+        graph[node][`${i},${j + 1}`] = 1;
       }
     }
   }
-  console.log(graph)
+  console.log(graph);
   res.status(200).send({ graph: graph });
 };
 exports.getDijkstra = (req, res, next) => {
