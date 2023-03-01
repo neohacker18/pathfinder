@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Grid } from "@chakra-ui/react";
+import { Grid, GridItem } from "@chakra-ui/react";
 import React from "react";
 import Box from "./Box";
 
@@ -17,8 +17,6 @@ const Matrix = ({
   nodesVisited,
   setNodesVisited,
 }) => {
-  useEffect(() => {}, [colourMatrix]);
-
   const START = start.split("-");
   const END = end.split("-");
   const items = [];
@@ -40,9 +38,6 @@ const Matrix = ({
           setPathTaken={setPathTaken}
         />
       );
-      // if ((START[0] == i && START[1] == j) || (END[0] == i && END[1] == j)) {
-      //   gridMatrix[i][j] = 1;
-      // }
       items.push(data);
     }
   }

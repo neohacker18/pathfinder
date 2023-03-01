@@ -8,8 +8,71 @@ function App() {
   const [cols, setCols] = useState(0);
   const [gridMatrix, setGridMatrix] = useState([]);
   const [colourMatrix, setColourMatrix] = useState([]);
-  const [pathTaken,setPathTaken]=useState([])
-  const [nodesVisited,setNodesVisited]=useState([])
+  const [pathTaken, setPathTaken] = useState([]);
+  const [nodesVisited, setNodesVisited] = useState([]);
+
+  useEffect(() => {
+    if (!colourMatrix) return;
+    setTimeout(() => {
+      for (let x = 1; x < nodesVisited.length - 1; x++) {
+        setTimeout(() => {
+          const i = nodesVisited[x].split(",")[0];
+          const j = nodesVisited[x].split(",")[1];
+          //for gradient you can use distance = sqrt ((i-starti)^2 + (j-startj)^2) and add that in the rgb
+          if (
+            i >= 0 &&
+            j >=0 &&
+            i < rows &&
+            j < cols &&
+            colourMatrix[i][j] !== "#0C3446"
+          ) {
+            colourMatrix[i][j] = `rgb(126,223,217)`;
+            setColourMatrix((prevMatrix) => {
+              const newMatrix = [...prevMatrix];
+              newMatrix[i][j] = colourMatrix[i][j];
+              return newMatrix;
+            });
+          }
+        }, 100);
+      }
+      setTimeout(() => {
+        for (let x = 1; x < pathTaken.length - 1; x++) {
+          setTimeout(() => {
+            const i = pathTaken[x].split(",")[0];
+            const j = pathTaken[x].split(",")[1];
+            //for gradient you can use distance = sqrt ((i-starti)^2 + (j-startj)^2) and add that in the rgb
+            if (
+              i >= 0 &&
+              j >= 0 &&
+              i < rows &&
+              j < cols &&
+              colourMatrix[i][j] !== "#0C3446"
+            ) {
+              colourMatrix[i][j] = `rgb(239,130,0)`;
+              setColourMatrix((prevMatrix) => {
+                const newMatrix = [...prevMatrix];
+                newMatrix[i][j] = colourMatrix[i][j];
+                return newMatrix;
+              });
+            }
+          }, 200);
+        }
+        const i1 = start.split("-")[0],
+          j1 = start.split("-")[1];
+        const i2 = end.split("-")[0],
+          j2 = end.split("-")[1];
+
+        if (colourMatrix.length > 0) {
+          colourMatrix[i1][j1] = "green";
+          colourMatrix[i2][j2] = "red";
+
+          setColourMatrix(colourMatrix);
+          // Loop through the matrix and color each index with a delay of 100ms
+        }
+      }, 1000);
+    }, 2000);
+  }, [pathTaken]);
+
   useEffect(() => {
     const height = window.innerHeight;
     const width = window.innerWidth;

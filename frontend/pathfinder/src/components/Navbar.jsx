@@ -107,31 +107,34 @@ export default function Navbar({
     return neighbors;
   }
   const handleDijkstra = () => {
+    setColourMatrix(colourMatrix)
     const startNode = start.split("-")[0] + "," + start.split("-")[1];
     const endNode = end.split("-")[0] + "," + end.split("-")[1];
     const response = dijkstra(gridMatrix, startNode, endNode);
-    setPathTaken(response)
-    setNodesVisited(nodesVisited)
-    // for (let x = 1; x < nodesVisited.length - 1; x++) {
-    //   const i = nodesVisited[x].split(",")[0];
-    //   const j = nodesVisited[x].split(",")[1];
-      // colourMatrix[i][j] = "#7EDFEC";
-    // }
-    // setColourMatrix(colourMatrix);
-    // console.log(colourMatrix);
-    //till response.length-1 because we dont want to change the colour of the end node
-    // for (let x = 1; x < response.length - 1; x++) {
-    //   const i = response[x].split(",")[0];
-    //   const j = response[x].split(",")[1];
-      
-      // colourMatrix[i][j] = "#EF8200";
-      // setColourMatrix(colourMatrix);
-    // }
-    // console.log(colourMatrix);
-    // })
-    // .catch((err) => console.log(err));
+    if (response && response.length > 1) {
+      setPathTaken(response);
+      setNodesVisited(nodesVisited);
+    } else {
+      setPathTaken([]);
+      setNodesVisited(nodesVisited);
+      console.log(`Couldn't find a path `);
+      return;
+    }
   };
-
+  const handleReset = (e) => {
+    if (e.target.value === "Clear-Board") {
+      for (let i = 0; i < colourMatrix.length; i++) {
+        for (let j = 0; j < colourMatrix[0].length; j++) {
+          if (i + "," + j === start || i + "," + j === end) {
+            continue;
+          }
+          colourMatrix[i][j] = "";
+        }
+      }
+      console.log("yo");
+      setColourMatrix(colourMatrix);
+    }
+  };
   return (
     <Flex
       as="nav"
@@ -176,6 +179,7 @@ export default function Navbar({
         size={"md"}
         width={"150px"}
         className={"select-menu"}
+        onChange={handleReset}
       >
         <option value="Clear-Path">Clear Path</option>
         <option value="Clear-Board">Clear Board</option>
