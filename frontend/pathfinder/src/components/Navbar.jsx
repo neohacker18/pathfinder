@@ -37,7 +37,6 @@ export default function Navbar({
   };
 
   function dijkstra(grid, startNode, endNode) {
-    // Initialize distances of all nodes to Infinity
     const distances = {};
     const visited = {};
     for (let i = 0; i < grid.length; i++) {
@@ -48,15 +47,11 @@ export default function Navbar({
       }
     }
 
-    // Set distance of start node to 0
     distances[startNode] = 0;
-    // Initialize priority queue with start node
     const queue = [startNode];
     while (queue.length > 0) {
-      // Get node with minimum distance from start
       const currentNode = queue.shift();
       nodesVisited.push(currentNode);
-      // If we have reached the end node, return the shortest path
       if (currentNode === endNode) {
         console.log(distances);
         const path = [currentNode];
@@ -78,24 +73,20 @@ export default function Navbar({
         return path;
       }
 
-      // Explore neighbors of current node
       const neighbors = getNeighbors(currentNode, grid.length, grid[0].length);
       if (neighbors.length === 0) continue;
       for (const neighbor of neighbors) {
         const [x, y] = neighbor.split(",").map(Number);
         const weight = grid[x][y];
 
-        // Calculate new distance from start to neighbor
         const distance = distances[currentNode] + (weight >= 1 ? weight : 1);
 
-        // Update distance if it's shorter than current distance
         if (distance < distances[neighbor]) {
           distances[neighbor] = distance;
           queue.push(neighbor);
         }
       }
     }
-    // If we reach here, there is no path from start to end
     return null;
   }
   function AStar(grid, start, end) {
