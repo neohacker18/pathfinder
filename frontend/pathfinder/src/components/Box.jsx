@@ -4,17 +4,11 @@ const Box = ({
   keyVal,
   start,
   end,
-  wall,
   gridMatrix,
   setGridMatrix,
   colourMatrix,
   setColourMatrix,
-  pathTaken,
-  setPathTaken,
-  nodesVisited,
-  setNodesVisited,
   nodeType,
-  setNodeType,
 }) => {
   const i = keyVal.split("-")[0];
   const j = keyVal.split("-")[1];
@@ -57,7 +51,7 @@ const Box = ({
 
     gridMatrix[i][j] = valueOfNode(nodeType); //weight of the node
     setGridMatrix(gridMatrix);
-    const colour=colourOfNode(nodeType)
+    const colour = colourOfNode(nodeType);
     setBgColor(colour);
     colourMatrix[i][j] = colour;
     setColourMatrix(colourMatrix);

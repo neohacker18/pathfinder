@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Flex, Spacer, Text, Select, Button } from "@chakra-ui/react";
-import axios from "axios";
 import "../App.css";
 import dfs from "../utils/dfs";
 import bfs from "../utils/bfs";

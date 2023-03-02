@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { Grid, GridItem } from "@chakra-ui/react";
+import { Grid } from "@chakra-ui/react";
 import React from "react";
 import Box from "./Box";
 
