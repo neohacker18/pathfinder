@@ -16,6 +16,8 @@ const Matrix = ({
   setPathTaken,
   nodesVisited,
   setNodesVisited,
+  nodeType,
+  setNodeType,
 }) => {
   const START = start.split("-");
   const END = end.split("-");
@@ -36,6 +38,8 @@ const Matrix = ({
           setNodesVisited={setNodesVisited}
           pathTaken={pathTaken}
           setPathTaken={setPathTaken}
+          nodeType={nodeType}
+          setNodeType={setNodeType}
         />
       );
       items.push(data);

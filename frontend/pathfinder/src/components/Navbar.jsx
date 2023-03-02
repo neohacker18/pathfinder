@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flex, Spacer, Link, Text, Select, Button } from "@chakra-ui/react";
+import { Flex, Spacer, Text, Select, Button } from "@chakra-ui/react";
 import axios from "axios";
 import "../App.css";
 
@@ -14,13 +14,18 @@ export default function Navbar({
   setPathTaken,
   nodesVisited,
   setNodesVisited,
+  nodeType,
+  setNodeType,
 }) {
   const [algo, setAlgo] = useState("Dijkstra");
   const [copyPath, setCopyPath] = useState([]);
+  const [activeHeuristic, setActiveHeuristic] = useState(false);
   const handlePlay = () => {
     console.log(algo);
     if (algo === "Dijkstra") {
       handleDijkstra();
+    } else if (algo === "A*") {
+      handleAStar();
     }
   };
   const handleAlgorithms = (e) => {
@@ -51,13 +56,7 @@ export default function Navbar({
         console.log(distances);
         const path = [currentNode];
         let prevNode = currentNode;
-        let x = 1000;
-        while (
-          prevNode !== startNode &&
-          prevNode &&
-          !visited[prevNode] &&
-          x--
-        ) {
+        while (prevNode !== startNode && prevNode && !visited[prevNode]) {
           const neighbors = getNeighbors(prevNode, grid.length, grid[0].length);
           if (neighbors.length === 0) break;
           let shortestNeighbor;
@@ -107,7 +106,7 @@ export default function Navbar({
     return neighbors;
   }
   const handleDijkstra = () => {
-    setColourMatrix(colourMatrix)
+    setColourMatrix(colourMatrix);
     const startNode = start.split("-")[0] + "," + start.split("-")[1];
     const endNode = end.split("-")[0] + "," + end.split("-")[1];
     const response = dijkstra(gridMatrix, startNode, endNode);
@@ -121,19 +120,138 @@ export default function Navbar({
       return;
     }
   };
-  const handleReset = (e) => {
-    if (e.target.value === "Clear-Board") {
-      for (let i = 0; i < colourMatrix.length; i++) {
-        for (let j = 0; j < colourMatrix[0].length; j++) {
-          if (i + "," + j === start || i + "," + j === end) {
-            continue;
-          }
-          colourMatrix[i][j] = "";
+  function getAStarNeighbors(node, GRID_ROWS, GRID_COLS) {
+    if (!node || !GRID_ROWS || !GRID_COLS) return [];
+    const [x, y] = node.split(",").map(Number);
+    const neighbors = [];
+    for (let i = 1; i <= 8; i++) {
+      if (i == 1) {
+        if (x > 0) neighbors.push(`${x - 1},${y}`);
+      } else if (i == 2) {
+        if (y > 0) neighbors.push(`${x},${y - 1}`);
+      } else if (i == 3) {
+        if (y < GRID_COLS - 1) neighbors.push(`${x},${y + 1}`);
+      } else if (i == 4) {
+        if (x < GRID_ROWS - 1) neighbors.push(`${x + 1},${y}`);
+      } else if (i == 5) {
+        setActiveHeuristic(true);
+        if (x > 0 && y > 0) neighbors.push(`${x - 1},${y - 1}`);
+      } else if (i == 6) {
+        setActiveHeuristic(true);
+        if (x < GRID_ROWS - 1 && y > 0) neighbors.push(`${x + 1},${y - 1}`);
+      } else if (i == 7) {
+        setActiveHeuristic(true);
+        if (x > 0 && y > GRID_COLS - 1) neighbors.push(`${x - 1},${y + 1}`);
+      } else if (i == 8) {
+        setActiveHeuristic(true);
+        if (x < GRID_ROWS - 1 && y < GRID_COLS - 1)
+          neighbors.push(`${x + 1},${y + 1}`);
+      }
+    }
+    return neighbors;
+  }
+  function AStar(grid, start, end) {
+    // Define the heuristic function to estimate the distance between nodes
+    function heuristic(a, b) {
+      const dx = Math.abs(a.split(",")[0] - b.split(",")[0]);
+      const dy = Math.abs(a.split(",")[1] - b.split(",")[1]);
+
+      let heuristic = Math.max(dx, dy) + 1.4 * Math.min(dx, dy);
+      if (!activeHeuristic) {
+        heuristic = dx + dy;
+      }
+      heuristic=heuristic*(1+0.01)
+      return heuristic;
+    }
+    // Initialize the open and closed sets, and the cameFrom map
+    let openSet = [start];
+    let closedSet = new Set();
+    let cameFrom = new Map();
+
+    // Initialize the gScore and fScore maps with default values of infinity
+    let gScore = new Map(grid.map((row) => row.map(() => Infinity)));
+    gScore.set(start, 0);
+
+    let fScore = new Map(grid.map((row) => row.map(() => Infinity)));
+    fScore.set(start, heuristic(start, end));
+    while (openSet.length > 0) {
+      let lowestFScore = 0;
+      for (let i = 1; i < openSet.length; i++) {
+        if (fScore.get(openSet[i]) < fScore.get(openSet[lowestFScore])) {
+          lowestFScore = i;
         }
       }
-      console.log("yo");
-      setColourMatrix(colourMatrix);
+      // Find the node in the open set with the lowest fScore
+      let current = openSet[lowestFScore];
+      nodesVisited.push(current);
+      // If the current node is the goal, reconstruct the path and return it
+      if (current === end) {
+        let path = [];
+        while (current && current !== start) {
+          path.unshift(current);
+          current = cameFrom.get(current);
+        }
+        path.unshift(0);
+        console.log(path);
+
+        return path;
+      }
+      openSet.splice(lowestFScore, 1);
+      closedSet.add(current);
+
+      // Loop over the neighbors of the current node
+      for (let neighbor of getAStarNeighbors(
+        current,
+        grid.length,
+        grid[0].length
+      )) {
+        const weight = grid[neighbor.split(",")[0]][neighbor.split(",")[1]];
+        // If the neighbor is already in the closed set or its weight === infinite, skip it
+        if (weight === Infinity || closedSet.has(neighbor)) continue;
+
+        // Calculate the tentative gScore
+        let tentativeGScore = gScore.get(current) + (weight >= 1 ? weight : 1);
+        console.log(tentativeGScore)
+        if (tentativeGScore < gScore.get(neighbor)) {
+          gScore.set(neighbor, tentativeGScore);
+          fScore.set(neighbor, tentativeGScore + heuristic(neighbor, end));
+          // Record the current node as the best path to the neighbor so far
+          cameFrom.set(neighbor, current);
+          // If the neighbor is not in the open set, add it
+        }
+        if (!openSet.includes(neighbor)) {
+          openSet.push(neighbor);
+          console.log(openSet)
+        }
+      }
     }
+    // If the loop completes without finding the goal, return null
+    return null;
+  }
+
+  const handleAStar = () => {
+    setColourMatrix(colourMatrix);
+    const startNode = start.split("-")[0] + "," + start.split("-")[1];
+    const endNode = end.split("-")[0] + "," + end.split("-")[1];
+    const response = AStar(gridMatrix, startNode, endNode);
+    if (response && response.length > 1) {
+      setPathTaken(response);
+      setNodesVisited(nodesVisited);
+    } else {
+      setPathTaken([]);
+      setNodesVisited(nodesVisited);
+      console.log(`Couldn't find a path `);
+      return;
+    }
+  };
+
+  const handleReset = (e) => {
+    if (e.target.value === "Clear-Board") {
+      console.log("Clear board algo here!");
+    }
+  };
+  const handleNodeType = (e) => {
+    setNodeType(e.target.value);
   };
   return (
     <Flex
@@ -190,17 +308,15 @@ export default function Navbar({
         size={"md"}
         width={"150px"}
         className={"select-menu"}
+        onChange={handleNodeType}
+        defaultValue={"Wall"}
       >
-        <option value="Air">[1] Air</option>
-        <option value="Wall">[Infinite] Wall</option>
-        <option value="Start">[1] Start</option>
-        <option value="Finish">[1] Finish</option>
-        <option value="Granite">[50] Granite</option>
+        <option value="Wall">[Infinity] Wall</option>
         <option value="Grass">[5] Grass</option>
         <option value="Sand">[7] Sand</option>
-        <option value="Snow">[75] Snow</option>
-        <option value="Stone">[25] Stone</option>
+        <option value="Granite">[50] Granite</option>
         <option value="Water">[50] Water</option>
+        <option value="Snow">[75] Snow</option>
         <option value="Deep-Water">[100] Deep Water</option>
       </Select>
       <Button size={"md"} variant={"outline"} id={"settings-btn"}>

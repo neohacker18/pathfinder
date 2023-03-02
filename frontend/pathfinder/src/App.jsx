@@ -10,7 +10,7 @@ function App() {
   const [colourMatrix, setColourMatrix] = useState([]);
   const [pathTaken, setPathTaken] = useState([]);
   const [nodesVisited, setNodesVisited] = useState([]);
-
+  const [nodeType,setNodeType]=useState('Wall')
   useEffect(() => {
     if (!colourMatrix) return;
     setTimeout(() => {
@@ -23,10 +23,10 @@ function App() {
             i >= 0 &&
             j >=0 &&
             i < rows &&
-            j < cols &&
-            colourMatrix[i][j] !== "#0C3446"
+            j < cols 
           ) {
-            colourMatrix[i][j] = `rgb(126,223,217)`;
+            let colour=`rgb(126,223,217)`;
+            colourMatrix[i][j] = colour;
             setColourMatrix((prevMatrix) => {
               const newMatrix = [...prevMatrix];
               newMatrix[i][j] = colourMatrix[i][j];
@@ -45,10 +45,10 @@ function App() {
               i >= 0 &&
               j >= 0 &&
               i < rows &&
-              j < cols &&
-              colourMatrix[i][j] !== "#0C3446"
+              j < cols 
             ) {
-              colourMatrix[i][j] = `rgb(239,130,0)`;
+              let colour=`rgb(239,130,0)`
+              colourMatrix[i][j]=colour;
               setColourMatrix((prevMatrix) => {
                 const newMatrix = [...prevMatrix];
                 newMatrix[i][j] = colourMatrix[i][j];
@@ -110,6 +110,8 @@ function App() {
         setNodesVisited={setNodesVisited}
         pathTaken={pathTaken}
         setPathTaken={setPathTaken}
+        nodeType={nodeType}
+        setNodeType={setNodeType}
       />
       <Logbar />
       <Matrix
@@ -125,6 +127,8 @@ function App() {
         setNodesVisited={setNodesVisited}
         pathTaken={pathTaken}
         setPathTaken={setPathTaken}
+        nodeType={nodeType}
+        setNodeType={setNodeType}
       />
     </div>
   );

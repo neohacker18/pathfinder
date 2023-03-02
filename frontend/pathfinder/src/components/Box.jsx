@@ -13,6 +13,8 @@ const Box = ({
   setPathTaken,
   nodesVisited,
   setNodesVisited,
+  nodeType,
+  setNodeType,
 }) => {
   const i = keyVal.split("-")[0];
   const j = keyVal.split("-")[1];
@@ -28,18 +30,39 @@ const Box = ({
     }
     setColourMatrix(colourMatrix);
   }, []);
-
+  function valueOfNode(nodeType) {
+    if (nodeType === "Wall") return Infinity;
+    else if (nodeType === "Air") return 1;
+    else if (nodeType === "Grass") return 5;
+    else if (nodeType === "Sand") return 7;
+    else if (nodeType === "Water") return 50;
+    else if (nodeType === "Granite") return 50;
+    else if (nodeType === "Snow") return 75;
+    else if (nodeType === "Deep-Water") return 100;
+    return Infinity;
+  }
+  function colourOfNode(nodeType) {
+    if (nodeType === "Wall") return "#0C3446";
+    else if (nodeType === "Air") return "#AFC9FB";
+    else if (nodeType === "Grass") return "#809F75";
+    else if (nodeType === "Sand") return "#C2AE7D";
+    else if (nodeType === "Water") return "#016EFE";
+    else if (nodeType === "Granite") return "#8C8D8D";
+    else if (nodeType === "Snow") return "#C8D7E1";
+    else if (nodeType === "Deep-Water") return "#014197";
+    return "#0C3446";
+  }
   const handleClick = (e) => {
     if (start || end) return;
 
-    gridMatrix[i][j] = Infinity; //weight of the node
+    gridMatrix[i][j] = valueOfNode(nodeType); //weight of the node
     setGridMatrix(gridMatrix);
-    setBgColor(`#0C3446`);
-    colourMatrix[i][j] = `#0C3446`;
+    const colour=colourOfNode(nodeType)
+    setBgColor(colour);
+    colourMatrix[i][j] = colour;
     setColourMatrix(colourMatrix);
   };
 
-  
   return (
     <GridItem
       style={{
