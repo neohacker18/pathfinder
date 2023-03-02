@@ -19,7 +19,6 @@ export default function Navbar({
 }) {
   const [algo, setAlgo] = useState("Dijkstra");
   const [copyPath, setCopyPath] = useState([]);
-  const [activeHeuristic, setActiveHeuristic] = useState(false);
   const handlePlay = () => {
     console.log(algo);
     if (algo === "Dijkstra") {
@@ -95,14 +94,14 @@ export default function Navbar({
   }
 
   function getNeighbors(node, GRID_ROWS, GRID_COLS) {
+    console.log(GRID_ROWS + ",,," + GRID_COLS);
     if (!node || !GRID_ROWS || !GRID_COLS) return [];
     const [x, y] = node.split(",").map(Number);
     const neighbors = [];
-    if (x < GRID_ROWS - 1) neighbors.push(`${x + 1},${y}`);
-    if (y < GRID_COLS - 1) neighbors.push(`${x},${y + 1}`);
     if (x > 0) neighbors.push(`${x - 1},${y}`);
     if (y > 0) neighbors.push(`${x},${y - 1}`);
-
+    if (x < GRID_ROWS - 1) neighbors.push(`${x + 1},${y}`);
+    if (y < GRID_COLS - 1) neighbors.push(`${x},${y + 1}`);
     return neighbors;
   }
   const handleDijkstra = () => {
@@ -120,59 +119,41 @@ export default function Navbar({
       return;
     }
   };
-  function getAStarNeighbors(node, GRID_ROWS, GRID_COLS) {
-    if (!node || !GRID_ROWS || !GRID_COLS) return [];
-    const [x, y] = node.split(",").map(Number);
-    const neighbors = [];
-    for (let i = 1; i <= 8; i++) {
-      if (i == 1) {
-        if (x > 0) neighbors.push(`${x - 1},${y}`);
-      } else if (i == 2) {
-        if (y > 0) neighbors.push(`${x},${y - 1}`);
-      } else if (i == 3) {
-        if (y < GRID_COLS - 1) neighbors.push(`${x},${y + 1}`);
-      } else if (i == 4) {
-        if (x < GRID_ROWS - 1) neighbors.push(`${x + 1},${y}`);
-      } else if (i == 5) {
-        setActiveHeuristic(true);
-        if (x > 0 && y > 0) neighbors.push(`${x - 1},${y - 1}`);
-      } else if (i == 6) {
-        setActiveHeuristic(true);
-        if (x < GRID_ROWS - 1 && y > 0) neighbors.push(`${x + 1},${y - 1}`);
-      } else if (i == 7) {
-        setActiveHeuristic(true);
-        if (x > 0 && y > GRID_COLS - 1) neighbors.push(`${x - 1},${y + 1}`);
-      } else if (i == 8) {
-        setActiveHeuristic(true);
-        if (x < GRID_ROWS - 1 && y < GRID_COLS - 1)
-          neighbors.push(`${x + 1},${y + 1}`);
-      }
-    }
-    return neighbors;
-  }
   function AStar(grid, start, end) {
     // Define the heuristic function to estimate the distance between nodes
     function heuristic(a, b) {
-      const dx = Math.abs(a.split(",")[0] - b.split(",")[0]);
-      const dy = Math.abs(a.split(",")[1] - b.split(",")[1]);
+      const row1 = a.split(",")[0],
+        col1 = a.split(",")[1];
+      const row2 = b.split(",")[0],
+        col2 = b.split(",")[1];
+
+      const dx = Math.abs(col1 - col2);
+      const dy = Math.abs(row1 - row2);
 
       let heuristic = Math.max(dx, dy) + 1.4 * Math.min(dx, dy);
-      if (!activeHeuristic) {
-        heuristic = dx + dy;
-      }
-      heuristic=heuristic*(1+0.01)
       return heuristic;
     }
-    // Initialize the open and closed sets, and the cameFrom map
     let openSet = [start];
     let closedSet = new Set();
     let cameFrom = new Map();
 
+    setNodesVisited([]);
+
     // Initialize the gScore and fScore maps with default values of infinity
-    let gScore = new Map(grid.map((row) => row.map(() => Infinity)));
+    let gScore = new Map();
+    for (let x = 0; x < grid.length; x++) {
+      for (let y = 0; y < grid[0].length; y++) {
+        gScore.set(`${x},${y}`, Infinity);
+      }
+    }
     gScore.set(start, 0);
 
-    let fScore = new Map(grid.map((row) => row.map(() => Infinity)));
+    let fScore = new Map();
+    for (let x = 0; x < grid.length; x++) {
+      for (let y = 0; y < grid[0].length; y++) {
+        fScore.set(`${x},${y}`, Infinity);
+      }
+    }
     fScore.set(start, heuristic(start, end));
     while (openSet.length > 0) {
       let lowestFScore = 0;
@@ -187,41 +168,32 @@ export default function Navbar({
       // If the current node is the goal, reconstruct the path and return it
       if (current === end) {
         let path = [];
-        while (current && current !== start) {
+        while (cameFrom.get(current)) {
           path.unshift(current);
           current = cameFrom.get(current);
         }
         path.unshift(0);
         console.log(path);
-
+        console.log(nodesVisited);
         return path;
       }
       openSet.splice(lowestFScore, 1);
       closedSet.add(current);
 
       // Loop over the neighbors of the current node
-      for (let neighbor of getAStarNeighbors(
-        current,
-        grid.length,
-        grid[0].length
-      )) {
+      for (let neighbor of getNeighbors(current, grid.length, grid[0].length)) {
         const weight = grid[neighbor.split(",")[0]][neighbor.split(",")[1]];
         // If the neighbor is already in the closed set or its weight === infinite, skip it
         if (weight === Infinity || closedSet.has(neighbor)) continue;
 
-        // Calculate the tentative gScore
         let tentativeGScore = gScore.get(current) + (weight >= 1 ? weight : 1);
-        console.log(tentativeGScore)
         if (tentativeGScore < gScore.get(neighbor)) {
+          cameFrom.set(neighbor, current);
           gScore.set(neighbor, tentativeGScore);
           fScore.set(neighbor, tentativeGScore + heuristic(neighbor, end));
-          // Record the current node as the best path to the neighbor so far
-          cameFrom.set(neighbor, current);
-          // If the neighbor is not in the open set, add it
         }
         if (!openSet.includes(neighbor)) {
           openSet.push(neighbor);
-          console.log(openSet)
         }
       }
     }
