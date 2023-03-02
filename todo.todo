@@ -11,3 +11,5 @@ instead of colouring all at once, store the path taken and the nodes visited in 
 for gradient you can use distance = sqrt ((i-starti)^2 + (j-startj)^2) and add that in the rgb 
 
 draggable start and stop
+
+send an alert if the path cannot be found

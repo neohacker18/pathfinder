@@ -11,8 +11,11 @@ function App() {
   const [pathTaken, setPathTaken] = useState([]);
   const [nodesVisited, setNodesVisited] = useState([]);
   const [nodeType,setNodeType]=useState('Wall')
+  const [log,setLog]=useState('')
   useEffect(() => {
     if (!colourMatrix) return;
+    if(nodesVisited.length>0)
+    setLog(`Nodes travelled = ${nodesVisited.length} and Path length = ${pathTaken.length} units`)
     setTimeout(() => {
       for (let x = 1; x < nodesVisited.length - 1; x++) {
         setTimeout(() => {
@@ -113,7 +116,7 @@ function App() {
         nodeType={nodeType}
         setNodeType={setNodeType}
       />
-      <Logbar />
+      <Logbar log={log}/>
       <Matrix
         rows={rows}
         cols={cols}

@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react'
 import React from 'react'
 
-const Logbar = () => {
+const Logbar = ({log}) => {
   return (
     <Flex
     bg={'black'}
@@ -9,7 +9,7 @@ const Logbar = () => {
     height={'6vh'}
     alignItems={"center"}
     paddingLeft={'50px'}
-    >Logbar</Flex>
+    >{log}</Flex>
   )
 }
 
