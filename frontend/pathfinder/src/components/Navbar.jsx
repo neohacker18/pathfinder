@@ -191,7 +191,7 @@ export default function Navbar({
         Pathfinding Visualiser
       </Text>
       <Spacer />
-      <Button bg={"red"} variant={"outline"} marginX={"5"} onClick={handlePlay}>
+      <Button id={'play__button'} marginX={"5"} onClick={handlePlay}>
         Play
       </Button>
       <Select
@@ -213,6 +213,7 @@ export default function Navbar({
         marginLeft={5}
         className={"select-menu"}
         onChange={handleTerrain}
+        disabled={true}
       >
         <option value="Recursive-Maze">Recursive Maze</option>
         <option value="Simplex-Terrain">Simplex Terrain</option>

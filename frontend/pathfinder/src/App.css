@@ -1,6 +1,6 @@
 .select-menu option{
     color: black;
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(56, 52, 52);
 }
 
 #settings-btn:hover{
@@ -9,10 +9,20 @@
 
 #reset__button{
     background-color: transparent;
-    border: 1px solid white;
+    border: 0.1px solid rgb(206, 205, 205);
 }
 
 #reset__button:hover{
     background-color: black;
-    border: 1px solid white;
+    border: 0.1px solid rgb(197, 197, 197);
+}
+
+#play__button{
+    background-color: transparent;
+    border: 0.1px solid rgb(206, 205, 205);
+}
+
+#play__button:hover{
+    background-color: black;
+    border: 0.1px solid rgb(197, 197, 197);
 }
