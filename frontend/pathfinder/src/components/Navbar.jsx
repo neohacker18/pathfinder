@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Flex, Spacer, Text, Select, Button } from "@chakra-ui/react";
 import "../App.css";
 import dfs from "../utils/dfs";
 import bfs from "../utils/bfs";
+import generateMaze from "../utils/mazeGeneration";
+import dijkstras from "../utils/dijkstra";
+import AStar from "../utils/AStar";
+import { useToast } from "@chakra-ui/react";
 
 export default function Navbar({
   start,
@@ -19,9 +23,25 @@ export default function Navbar({
   setNodeType,
 }) {
   const [algo, setAlgo] = useState("Dijkstra");
-  const [copyPath, setCopyPath] = useState([]);
+  const toast = useToast();
   const handlePlay = () => {
-    console.log(algo);
+    if (nodesVisited && nodesVisited.length > 0)
+      for (let x = 1; x < nodesVisited.length - 1; x++) {
+        setNodesVisited((prev) => {
+          const vis = [...prev];
+          vis[x] = "";
+          return vis;
+        });
+      }
+    if (pathTaken && pathTaken.length > 0)
+      for (let x = 1; x < pathTaken.length - 1; x++) {
+        setPathTaken((prev) => {
+          const vis = [...prev];
+          vis[x] = "";
+          return vis;
+        });
+      }
+    handleClearBoard();
     if (algo === "Dijkstra") {
       handleDijkstra();
     } else if (algo === "A*") {
@@ -36,152 +56,25 @@ export default function Navbar({
     setAlgo(e.target.value);
   };
 
-  function dijkstra(grid, startNode, endNode) {
-    const distances = {};
-    const visited = {};
-    for (let i = 0; i < grid.length; i++) {
-      for (let j = 0; j < grid[i].length; j++) {
-        const node = `${i},${j}`;
-        distances[node] = Infinity;
-        visited[node] = false;
-      }
-    }
-
-    distances[startNode] = 0;
-    const queue = [startNode];
-    while (queue.length > 0) {
-      const currentNode = queue.shift();
-      nodesVisited.push(currentNode);
-      if (currentNode === endNode) {
-        console.log(distances);
-        const path = [currentNode];
-        let prevNode = currentNode;
-        while (prevNode !== startNode && prevNode && !visited[prevNode]) {
-          const neighbors = getNeighbors(prevNode, grid.length, grid[0].length);
-          if (neighbors.length === 0) break;
-          let shortestNeighbor;
-          let shortestDistance = Infinity;
-          for (const neighbor of neighbors) {
-            if (distances[neighbor] < shortestDistance) {
-              shortestNeighbor = neighbor;
-              shortestDistance = distances[neighbor];
-            }
-          }
-          path.unshift(shortestNeighbor);
-          prevNode = shortestNeighbor;
-        }
-        return path;
-      }
-
-      const neighbors = getNeighbors(currentNode, grid.length, grid[0].length);
-      if (neighbors.length === 0) continue;
-      for (const neighbor of neighbors) {
-        const [x, y] = neighbor.split(",").map(Number);
-        const weight = grid[x][y];
-
-        const distance = distances[currentNode] + (weight >= 1 ? weight : 1);
-
-        if (distance < distances[neighbor]) {
-          distances[neighbor] = distance;
-          queue.push(neighbor);
-        }
-      }
-    }
-    return null;
-  }
-  function AStar(grid, start, end) {
-    function heuristic(a, b) {
-      const row1 = a.split(",")[0],
-        col1 = a.split(",")[1];
-      const row2 = b.split(",")[0],
-        col2 = b.split(",")[1];
-
-      const dx = Math.abs(col1 - col2);
-      const dy = Math.abs(row1 - row2);
-
-      let heuristic = Math.max(dx, dy) + 1.4 * Math.min(dx, dy);
-      return heuristic;
-    }
-    let openSet = [start];
-    let closedSet = new Set();
-    let cameFrom = new Map();
-
-    setNodesVisited([]);
-
-    let gScore = new Map();
-    for (let x = 0; x < grid.length; x++) {
-      for (let y = 0; y < grid[0].length; y++) {
-        gScore.set(`${x},${y}`, Infinity);
-      }
-    }
-    gScore.set(start, 0);
-
-    let fScore = new Map();
-    for (let x = 0; x < grid.length; x++) {
-      for (let y = 0; y < grid[0].length; y++) {
-        fScore.set(`${x},${y}`, Infinity);
-      }
-    }
-    fScore.set(start, heuristic(start, end));
-    while (openSet.length > 0) {
-      let lowestFScore = 0;
-      for (let i = 1; i < openSet.length; i++) {
-        if (fScore.get(openSet[i]) < fScore.get(openSet[lowestFScore])) {
-          lowestFScore = i;
-        }
-      }
-      let current = openSet[lowestFScore];
-      nodesVisited.push(current);
-      if (current === end) {
-        let path = [];
-        while (cameFrom.get(current)) {
-          path.unshift(current);
-          current = cameFrom.get(current);
-        }
-        path.unshift(0);
-        return path;
-      }
-      openSet.splice(lowestFScore, 1);
-      closedSet.add(current);
-
-      for (let neighbor of getNeighbors(current, grid.length, grid[0].length)) {
-        const weight = grid[neighbor.split(",")[0]][neighbor.split(",")[1]];
-        if (weight === Infinity || closedSet.has(neighbor)) continue;
-
-        let tentativeGScore = gScore.get(current) + (weight >= 1 ? weight : 1);
-        if (tentativeGScore < gScore.get(neighbor)) {
-          cameFrom.set(neighbor, current);
-          gScore.set(neighbor, tentativeGScore);
-          fScore.set(neighbor, tentativeGScore + heuristic(neighbor, end));
-        }
-        if (!openSet.includes(neighbor)) {
-          openSet.push(neighbor);
-        }
-      }
-    }
-    return null;
-  }
-  function getNeighbors(node, GRID_ROWS, GRID_COLS) {
-    if (!node || !GRID_ROWS || !GRID_COLS) return [];
-    const [x, y] = node.split(",").map(Number);
-    const neighbors = [];
-    if (x > 0) neighbors.push(`${x - 1},${y}`);
-    if (y > 0) neighbors.push(`${x},${y - 1}`);
-    if (x < GRID_ROWS - 1) neighbors.push(`${x + 1},${y}`);
-    if (y < GRID_COLS - 1) neighbors.push(`${x},${y + 1}`);
-    return neighbors;
-  }
   const handleDijkstra = () => {
     setColourMatrix(colourMatrix);
     const startNode = start.split("-")[0] + "," + start.split("-")[1];
     const endNode = end.split("-")[0] + "," + end.split("-")[1];
-    const response = dijkstra(gridMatrix, startNode, endNode);
-    if (response && response.length > 1) {
-      setPathTaken(response);
-      setNodesVisited(nodesVisited);
+    const { path, visNodes } = dijkstras(gridMatrix, startNode, endNode);
+    console.log(path);
+    if (path && path.length > 1) {
+      setPathTaken(path);
+      setNodesVisited(visNodes);
     } else {
+      toast({
+        title: "Path does not exist",
+        description: "Couldn't find a path.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
       setPathTaken([]);
-      setNodesVisited(nodesVisited);
+      setNodesVisited(visNodes);
       console.log(`Couldn't find a path `);
       return;
     }
@@ -220,21 +113,51 @@ export default function Navbar({
     setColourMatrix(colourMatrix);
     const startNode = start.split("-")[0] + "," + start.split("-")[1];
     const endNode = end.split("-")[0] + "," + end.split("-")[1];
-    const response = AStar(gridMatrix, startNode, endNode);
-    if (response && response.length > 1) {
-      setPathTaken(response);
-      setNodesVisited(nodesVisited);
+    const { path, visNodes } = AStar(gridMatrix, startNode, endNode);
+    if (path && path.length > 1) {
+      setPathTaken(path);
+      setNodesVisited(visNodes);
     } else {
       setPathTaken([]);
-      setNodesVisited(nodesVisited);
+      setNodesVisited(visNodes);
       console.log(`Couldn't find a path `);
       return;
     }
   };
-
+  const handleClearBoard = () => {
+    const i1 = start.split("-")[0],
+      j1 = start.split("-")[1];
+    const i2 = end.split("-")[0],
+      j2 = end.split("-")[1];
+    for (let i = 0; i < colourMatrix.length; i++) {
+      for (let j = 0; j < colourMatrix[0].length; j++) {
+        setColourMatrix((prevMatrix) => {
+          const newMatrix = [...prevMatrix];
+          newMatrix[i][j] = "";
+          newMatrix[i1][j1] = "green";
+          newMatrix[i2][j2] = "red";
+          return newMatrix;
+        });
+      }
+    }
+  };
   const handleReset = (e) => {
     if (e.target.value === "Clear-Board") {
-      console.log("Clear board algo here!");
+      handleClearBoard();
+    }
+  };
+  const handleTerrain = (e) => {
+    if (e.target.value === "Recursive-Maze") {
+      const maze = generateMaze(gridMatrix.length, gridMatrix[0].length);
+      for (let x = 0; x < colourMatrix.length; x++) {
+        for (let y = 0; y < colourMatrix[0].length; y++) {
+          if (maze[x][y] === 1) {
+            colourMatrix[x][y] = "black";
+          } else colourMatrix[x][y] = "";
+        }
+      }
+      setColourMatrix(colourMatrix);
+      setGridMatrix(maze);
     }
   };
   const handleNodeType = (e) => {
@@ -250,7 +173,11 @@ export default function Navbar({
       color="white"
       height={"13vh"}
     >
-      <Text fontSize="xl" fontWeight="bold">
+      <Text
+        fontSize="xl"
+        fontWeight="bold"
+        className="animate__animated animate__pulse"
+      >
         Pathfinding Visualiser
       </Text>
       <Spacer />
@@ -264,7 +191,7 @@ export default function Navbar({
         onChange={handleAlgorithms}
         className={"select-menu"}
       >
-        <option value="Dijkstra">Dijksta's Algorithm</option>
+        <option value="Dijkstra">Dijkstra's Algorithm</option>
         <option value="A*">A* Search</option>
         <option value="BFS">Breadth First Search</option>
         <option value="DFS">Depth First Search</option>
@@ -274,6 +201,7 @@ export default function Navbar({
         size={"md"}
         width={"150px"}
         className={"select-menu"}
+        onChange={handleTerrain}
       >
         <option value="Recursive-Maze">Recursive Maze</option>
         <option value="Simplex-Terrain">Simplex Terrain</option>

@@ -13,3 +13,7 @@ for gradient you can use distance = sqrt ((i-starti)^2 + (j-startj)^2) and add t
 draggable start and stop
 
 send an alert if the path cannot be found
+
+
+
+#####create a local storage copy of the start node end node and the grid matrix and the colour matrix and set it once

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { GridItem, Button } from "@chakra-ui/react";
+import 'animate.css';
 const Box = ({
   keyVal,
   start,
@@ -13,7 +14,7 @@ const Box = ({
   const i = keyVal.split("-")[0];
   const j = keyVal.split("-")[1];
   const [bgColor, setBgColor] = useState("");
-
+  const [flag,setFlag]=useState(0);
   useEffect(() => {
     if (start) {
       setBgColor("green");
@@ -47,6 +48,7 @@ const Box = ({
     return "#0C3446";
   }
   const handleClick = (e) => {
+    setFlag(1-flag)
     if (start || end) return;
 
     gridMatrix[i][j] = valueOfNode(nodeType); //weight of the node
@@ -57,7 +59,20 @@ const Box = ({
     setColourMatrix(colourMatrix);
   };
 
-  return (
+  return (flag?
+    <GridItem
+    className={`animate__animated animate__bounceIn`}
+      style={{
+        height: "25.1px",
+        width: "25.8px",
+        border: `0.01px solid #B0E6F7`,
+        backgroundColor: `${colourMatrix[i][j]}`,
+        padding: 0,
+        margin: 0,
+      }}
+      onClick={handleClick}
+      borderRadius={0}
+    />:
     <GridItem
       style={{
         height: "25.1px",

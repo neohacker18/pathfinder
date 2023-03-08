@@ -10,28 +10,31 @@ function App() {
   const [colourMatrix, setColourMatrix] = useState([]);
   const [pathTaken, setPathTaken] = useState([]);
   const [nodesVisited, setNodesVisited] = useState([]);
-  const [nodeType,setNodeType]=useState('Wall')
-  const [log,setLog]=useState('')
+  const [nodeType, setNodeType] = useState("Wall");
+  const [log, setLog] = useState("");
   useEffect(() => {
-    if (!colourMatrix) return;
-    if(nodesVisited.length>0)
-    setLog(`Nodes travelled = ${nodesVisited.length} and Path length = ${pathTaken.length} units`)
+    if (colourMatrix.length===0) return ;
+    if (nodesVisited.length > 0)
+      setLog(
+        `Nodes travelled = ${nodesVisited.length} and Path length = ${pathTaken.length} units`
+      );
     setTimeout(() => {
       for (let x = 1; x < nodesVisited.length - 1; x++) {
         setTimeout(() => {
           const i = nodesVisited[x].split(",")[0];
           const j = nodesVisited[x].split(",")[1];
           //for gradient you can use distance = sqrt ((i-starti)^2 + (j-startj)^2) and add that in the rgb
-          if (
-            i >= 0 &&
-            j >=0 &&
-            i < rows &&
-            j < cols 
-          ) {
-            let colour=`rgb(126,223,217)`;
+          if (i >= 0 && j >= 0 && i < rows && j < cols) {
+            let colour = `rgb(126,223,217)`;
             colourMatrix[i][j] = colour;
             setColourMatrix((prevMatrix) => {
               const newMatrix = [...prevMatrix];
+              const i1 = start.split("-")[0],
+                j1 = start.split("-")[1];
+              const i2 = end.split("-")[0],
+                j2 = end.split("-")[1];
+              newMatrix[i1][j1] = "green";
+              newMatrix[i2][j2] = "red";
               newMatrix[i][j] = colourMatrix[i][j];
               return newMatrix;
             });
@@ -39,26 +42,25 @@ function App() {
         }, 100);
       }
       setTimeout(() => {
+        setColourMatrix((prevMatrix) => {
+          const newMatrix = [...prevMatrix];
+          return newMatrix;
+        });
         for (let x = 1; x < pathTaken.length - 1; x++) {
           setTimeout(() => {
             const i = pathTaken[x].split(",")[0];
             const j = pathTaken[x].split(",")[1];
             //for gradient you can use distance = sqrt ((i-starti)^2 + (j-startj)^2) and add that in the rgb
-            if (
-              i >= 0 &&
-              j >= 0 &&
-              i < rows &&
-              j < cols 
-            ) {
-              let colour=`rgb(239,130,0)`
-              colourMatrix[i][j]=colour;
+            if (i >= 0 && j >= 0 && i < rows && j < cols) {
+              let colour = `rgb(239,130,0)`;
+              colourMatrix[i][j] = colour;
               setColourMatrix((prevMatrix) => {
                 const newMatrix = [...prevMatrix];
                 newMatrix[i][j] = colourMatrix[i][j];
                 return newMatrix;
               });
             }
-          }, 200);
+          }, 100);
         }
         const i1 = start.split("-")[0],
           j1 = start.split("-")[1];
@@ -70,12 +72,10 @@ function App() {
           colourMatrix[i2][j2] = "red";
 
           setColourMatrix(colourMatrix);
-          // Loop through the matrix and color each index with a delay of 100ms
         }
       }, 1000);
     }, 2000);
   }, [pathTaken]);
-
   useEffect(() => {
     const height = window.innerHeight;
     const width = window.innerWidth;
@@ -116,7 +116,7 @@ function App() {
         nodeType={nodeType}
         setNodeType={setNodeType}
       />
-      <Logbar log={log}/>
+      <Logbar log={log} />
       <Matrix
         rows={rows}
         cols={cols}
