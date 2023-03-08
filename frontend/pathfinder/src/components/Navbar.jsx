@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Flex, Spacer, Text, Select, Button } from "@chakra-ui/react";
+import { Flex, Spacer, Text, Select, Button, grid } from "@chakra-ui/react";
 import "../App.css";
 import dfs from "../utils/dfs";
 import bfs from "../utils/bfs";
@@ -25,23 +25,7 @@ export default function Navbar({
   const [algo, setAlgo] = useState("Dijkstra");
   const toast = useToast();
   const handlePlay = () => {
-    if (nodesVisited && nodesVisited.length > 0)
-      for (let x = 1; x < nodesVisited.length - 1; x++) {
-        setNodesVisited((prev) => {
-          const vis = [...prev];
-          vis[x] = "";
-          return vis;
-        });
-      }
-    if (pathTaken && pathTaken.length > 0)
-      for (let x = 1; x < pathTaken.length - 1; x++) {
-        setPathTaken((prev) => {
-          const vis = [...prev];
-          vis[x] = "";
-          return vis;
-        });
-      }
-    handleClearBoard();
+    handlePlayClear();
     if (algo === "Dijkstra") {
       handleDijkstra();
     } else if (algo === "A*") {
@@ -124,6 +108,19 @@ export default function Navbar({
       return;
     }
   };
+  const handlePlayClear = () => {
+    for (let i = 0; i < colourMatrix.length; i++) {
+      for (let j = 0; j < colourMatrix[0].length; j++) {
+        if (
+          colourMatrix[i][j] === `rgb(126,223,217)` ||
+          colourMatrix[i][j] === `rgb(239,130,0)`
+        ) {
+          colourMatrix[i][j] = "";
+          setColourMatrix(colourMatrix);
+        } //either path or visited nodes
+      }
+    }
+  };
   const handleClearBoard = () => {
     const i1 = start.split("-")[0],
       j1 = start.split("-")[1];
@@ -140,11 +137,24 @@ export default function Navbar({
         });
       }
     }
+    for (let i = 0; i < gridMatrix.length; i++) {
+      for (let j = 0; j < gridMatrix[0].length; j++) {
+        const i1 = start.split("-")[0],
+          j1 = start.split("-")[1];
+        const i2 = end.split("-")[0],
+          j2 = end.split("-")[1];
+        if (!((i == i1 && j == j1) || (i == i2 && j == j2))) {
+          setGridMatrix((prev) => {
+            const n = [...prev];
+            n[i][j] = 0;
+            return n;
+          });
+        }
+      }
+    }
   };
   const handleReset = (e) => {
-    if (e.target.value === "Clear-Board") {
-      handleClearBoard();
-    }
+    handleClearBoard();
   };
   const handleTerrain = (e) => {
     if (e.target.value === "Recursive-Maze") {
@@ -181,7 +191,7 @@ export default function Navbar({
         Pathfinding Visualiser
       </Text>
       <Spacer />
-      <Button bg={"red"} variant={"outline"} marginX={"3"} onClick={handlePlay}>
+      <Button bg={"red"} variant={"outline"} marginX={"5"} onClick={handlePlay}>
         Play
       </Button>
       <Select
@@ -200,6 +210,7 @@ export default function Navbar({
         placeholder="Terrain"
         size={"md"}
         width={"150px"}
+        marginLeft={5}
         className={"select-menu"}
         onChange={handleTerrain}
       >
@@ -207,17 +218,16 @@ export default function Navbar({
         <option value="Simplex-Terrain">Simplex Terrain</option>
         <option value="Random-Terrain">Random Terrain</option>
       </Select>
-      <Select
-        placeholder="Reset"
+      <Button
         size={"md"}
-        width={"150px"}
-        className={"select-menu"}
-        onChange={handleReset}
+        width={"100px"}
+        marginLeft={5}
+        marginRight={5}
+        onClick={handleReset}
+        id={'reset__button'}
       >
-        <option value="Clear-Path">Clear Path</option>
-        <option value="Clear-Board">Clear Board</option>
-        <option value="Reset-Board">Reset Board</option>
-      </Select>
+        Clear Board
+      </Button>
       <Select
         placeholder="Node Type"
         size={"md"}
@@ -234,7 +244,9 @@ export default function Navbar({
         <option value="Snow">[75] Snow</option>
         <option value="Deep-Water">[100] Deep Water</option>
       </Select>
-      <Button size={"md"} variant={"outline"} id={"settings-btn"}>
+      <Button size={"md"} variant={"outline"} id={"settings-btn"}
+      marginLeft={5}
+      >
         Settings
       </Button>
     </Flex>

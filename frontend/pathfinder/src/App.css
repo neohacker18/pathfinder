@@ -6,3 +6,13 @@
 #settings-btn:hover{
     background-color: black;
 }
+
+#reset__button{
+    background-color: transparent;
+    border: 1px solid white;
+}
+
+#reset__button:hover{
+    background-color: black;
+    border: 1px solid white;
+}
